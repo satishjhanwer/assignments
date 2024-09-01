@@ -23,3 +23,26 @@ From the given inputs, your task is to create a B Tree and perform insertion, de
 ```bash
 3 4 5 6 7 8 9 10
 ```
+
+## Below are the some of the edge cases for this Question
+
+I am assuming main method will take 3 inputs, `t` degree of the tree, `A` elements to insert, `B` elements to delete
+
+```python
+    print("case 1")
+    main(3, [], [])
+    print("case 2")
+    main(3, [10], [10])
+    print("case 3")
+    main(3, [10, 20, 5, 6, 12, 30, 40], [10, 20])
+    print("case 4")
+    main(2, [10, 20, 5, 6, 12, 30, 40], [20, 10])
+    print("case 5")
+    main(2, [10, 10, 10, 10], [])
+    print("case 6")
+    main(2, [10, 20, 30, 40, 50, 60, 70, 80], [30])
+    print("case 7")
+    main(3, [1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7])
+    print("case 8")
+    main(3, [10, 20, 30, 40, 50, 60, 70], [10, 30])
+```
