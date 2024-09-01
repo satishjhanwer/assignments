@@ -1,5 +1,6 @@
 from bisect import bisect_left, insort
 
+
 def count_lower_popularity(arr):
     n = len(arr)
     result = [0] * n
@@ -9,11 +10,12 @@ def count_lower_popularity(arr):
         # Using BS finding no of elements less than arr[i]
         pos = bisect_left(sorted_list, arr[i])
         result[i] = pos
-        
+
         # Insert arr[i] into the sorted list while maintaining order
         insort(sorted_list, arr[i])
 
     return result
+
 
 def main():
     arr_len = int(input())
@@ -25,9 +27,12 @@ def main():
                 raise ValueError(arr_len)
             break
         except ValueError as e:
-            print(f"Provided array's length is more than the defined length: {e}. Please input again")
+            print(
+                f"Provided array's length is more than the defined length: {e}. Please input again"
+            )
 
     result = count_lower_popularity(arr)
     print(" ".join(map(str, result)))
-    
+
+
 main()
