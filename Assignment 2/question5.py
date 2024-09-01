@@ -118,7 +118,6 @@ class BTreeNode:
     def merge(self, idx):
         child = self.children[idx]
         sibling = self.children[idx + 1]
-        t = self.t
         child.keys.append(self.keys.pop(idx))
         child.keys.extend(sibling.keys)
         if not child.leaf:
