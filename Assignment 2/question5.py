@@ -5,12 +5,19 @@ class BTreeNode:
         self.keys = []  # Array of keys
         self.children = []  # Array of child pointers
 
-    def traverse_pre_order(self):
-        # Pre-order traversal using list comprehension
-        print(" ".join(str(key) for key in self.keys), end=" ")
+    def traverse_pre_order(self, result=None):
+        if result is None:
+            result = []
+
+        for i in range(len(self.keys)):
+            if not self.leaf:
+                self.children[i].traverse_pre_order(result)
+            result.append(self.keys[i])
+
         if not self.leaf:
-            for child in self.children:
-                child.traverse_pre_order()
+            self.children[len(self.keys)].traverse_pre_order(result)
+
+        return result
 
     def split_child(self, i, y):
         t = self.t
@@ -18,7 +25,6 @@ class BTreeNode:
         self.children.insert(i + 1, z)
         self.keys.insert(i, y.keys[t - 1])
 
-        # Using slicing for list operations
         z.keys = y.keys[t:]
         y.keys = y.keys[: t - 1]
 
@@ -29,8 +35,9 @@ class BTreeNode:
     def insert_non_full(self, k):
         i = len(self.keys) - 1
         if self.leaf:
-            self.keys.append(k)  # Simplify by appending and sorting
-            self.keys.sort()
+            if k not in self.keys:
+                self.keys.append(k)
+                self.keys.sort()
         else:
             while i >= 0 and self.keys[i] > k:
                 i -= 1
@@ -132,9 +139,9 @@ class BTree:
 
     def traverse_pre_order(self):
         if self.root is not None:
-            self.root.traverse_pre_order()
+            return self.root.traverse_pre_order()
         else:
-            print("None")
+            return []
 
     def insert(self, k):
         if self.root is None:
@@ -177,8 +184,11 @@ def main():
     for val in B:
         btree.remove(val)
 
-    btree.traverse_pre_order()
-    print()
+    result = btree.traverse_pre_order()
+    if result:
+        print(" ".join(map(str, result)))
+    else:
+        print("None")
 
 
 main()
