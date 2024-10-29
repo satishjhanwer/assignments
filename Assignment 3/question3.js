@@ -1,120 +1,24 @@
-const readline = require('node:readline');
+const readline = require("node:readline");
 
-class Node {
-  constructor(key, value) {
+class RedBlackNode {
+  constructor(key, index, color = "red") {
     this.key = key;
-    this.values = [value];
+    this.index = index;
+    this.color = color;
     this.left = null;
     this.right = null;
     this.parent = null;
-    this.color = 'RED';
-  }
-
-  isRed() {
-    return this.color === 'RED';
-  }
-
-  isBlack() {
-    return this.color === 'BLACK';
-  }
-
-  setRed() {
-    this.color = 'RED';
-  }
-
-  setBlack() {
-    this.color = 'BLACK';
-  }
-
-  hasChildren() {
-    return this.left !== null || this.right !== null;
-  }
-
-  toString() {
-    return `Node(key=${this.key}, value=${this.values}, color=${this.color})`;
   }
 }
 
 class RedBlackTree {
   constructor() {
-    this.NIL = new Node(null, null);
-    this.NIL.setBlack();
+    this.NIL = new RedBlackNode(null, null, "black");
     this.root = this.NIL;
   }
 
-  insert(key, value) {
-    let node = new Node(key, value);
-    node.left = this.NIL;
-    node.right = this.NIL;
-
-    let y = null;
-    let x = this.root;
-
-    while (x !== this.NIL) {
-      y = x;
-      if (node.key < x.key) {
-        x = x.left;
-      } else if (node.key > x.key) {
-        x = x.right;
-      } else {
-        x.values.push(value);
-        return;
-      }
-    }
-
-    node.parent = y;
-    if (y === null) {
-      this.root = node;
-    } else if (node.key < y.key) {
-      y.left = node;
-    } else {
-      y.right = node;
-    }
-
-    this.insertFixup(node);
-  }
-
-  insertFixup(node) {
-    while (node.parent !== null && node.parent.isRed()) {
-      if (node.parent === node.parent.parent.left) {
-        let y = node.parent.parent.right;
-        if (y.isRed()) {
-          node.parent.setBlack();
-          y.setBlack();
-          node.parent.parent.setRed();
-          node = node.parent.parent;
-        } else {
-          if (node === node.parent.right) {
-            node = node.parent;
-            this.leftRotate(node);
-          }
-          node.parent.setBlack();
-          node.parent.parent.setRed();
-          this.rightRotate(node.parent.parent);
-        }
-      } else {
-        let y = node.parent.parent.left;
-        if (y.isRed()) {
-          node.parent.setBlack();
-          y.setBlack();
-          node.parent.parent.setRed();
-          node = node.parent.parent;
-        } else {
-          if (node === node.parent.left) {
-            node = node.parent;
-            this.rightRotate(node);
-          }
-          node.parent.setBlack();
-          node.parent.parent.setRed();
-          this.leftRotate(node.parent.parent);
-        }
-      }
-    }
-    this.root.setBlack();
-  }
-
-  leftRotate(x) {
-    let y = x.right;
+  rotateLeft(x) {
+    const y = x.right;
     x.right = y.left;
     if (y.left !== this.NIL) {
       y.left.parent = x;
@@ -131,8 +35,8 @@ class RedBlackTree {
     x.parent = y;
   }
 
-  rightRotate(x) {
-    let y = x.left;
+  rotateRight(x) {
+    const y = x.left;
     x.left = y.right;
     if (y.right !== this.NIL) {
       y.right.parent = x;
@@ -149,84 +53,180 @@ class RedBlackTree {
     x.parent = y;
   }
 
-  findNextLarger(key) {
-    let node = this.root;
-    let result = null;
-
-    while (node !== this.NIL) {
-      if (node.key > key) {
-        result = node;
-        node = node.left;
+  fixInsert(node) {
+    while (node.parent && node.parent.color === "red") {
+      if (node.parent === node.parent.parent.left) {
+        const uncle = node.parent.parent.right;
+        if (uncle.color === "red") {
+          node.parent.color = "black";
+          uncle.color = "black";
+          node.parent.parent.color = "red";
+          node = node.parent.parent;
+        } else {
+          if (node === node.parent.right) {
+            node = node.parent;
+            this.rotateLeft(node);
+          }
+          node.parent.color = "black";
+          node.parent.parent.color = "red";
+          this.rotateRight(node.parent.parent);
+        }
       } else {
-        node = node.right;
+        const uncle = node.parent.parent.left;
+        if (uncle.color === "red") {
+          node.parent.color = "black";
+          uncle.color = "black";
+          node.parent.parent.color = "red";
+          node = node.parent.parent;
+        } else {
+          if (node === node.parent.left) {
+            node = node.parent;
+            this.rotateRight(node);
+          }
+          node.parent.color = "black";
+          node.parent.parent.color = "red";
+          this.rotateLeft(node.parent.parent);
+        }
       }
     }
-
-    return result ? Math.min(...result.values) : null;
+    this.root.color = "black";
   }
 
-  findNextSmaller(key) {
-    let node = this.root;
-    let result = null;
+  insert(key, index) {
+    let node = new RedBlackNode(key, index);
+    let y = null;
+    let x = this.root;
 
-    while (node !== this.NIL) {
-      if (node.key < key) {
-        result = node;
-        node = node.right;
+    while (x !== this.NIL) {
+      y = x;
+      if (node.key < x.key) {
+        x = x.left;
+      } else if (node.key > x.key) {
+        x = x.right;
       } else {
-        node = node.left;
+        if (node.index < x.index) {
+          x.index = node.index;
+        }
+        return;
       }
     }
 
-    return result ? Math.max(...result.values) : null;
+    node.parent = y;
+    if (y === null) {
+      this.root = node;
+    } else if (node.key < y.key) {
+      y.left = node;
+    } else {
+      y.right = node;
+    }
+
+    node.left = this.NIL;
+    node.right = this.NIL;
+    node.color = "red";
+
+    this.fixInsert(node);
+  }
+
+  findSuccessor(key) {
+    let root = this.root;
+    let succ = null;
+    while (root !== this.NIL) {
+      if (key <= root.key) {
+        succ = root;
+        root = root.left;
+      } else {
+        root = root.right;
+      }
+    }
+    return succ;
+  }
+
+  findPredecessor(key) {
+    let root = this.root;
+    let pred = null;
+    while (root !== this.NIL) {
+      if (key >= root.key) {
+        pred = root;
+        root = root.right;
+      } else {
+        root = root.left;
+      }
+    }
+    return pred;
   }
 }
 
-function countSubmittedSheets(n, A) {
-  const tree = new RedBlackTree();
-  let count = 0;
+function something(A, n) {
+  const nextOdd = Array(n).fill(null);
+  const nextEven = Array(n).fill(null);
+
+  const treeOdd = new RedBlackTree();
+  const treeEven = new RedBlackTree();
 
   for (let i = n - 1; i >= 0; i--) {
-    tree.insert(A[i], i);
-    let current = i;
-    let t = 1;
-
-    while (current < n - 1) {
-      let next;
-      if (t % 2 === 1) {
-        next = tree.findNextLarger(A[current]);
-      } else {
-        next = tree.findNextSmaller(A[current]);
-      }
-
-      if (next === null || next <= current) break;
-
-      current = next;
-      t++;
+    const result = treeOdd.findSuccessor(A[i]);
+    if (result !== null) {
+      nextOdd[i] = result.index;
     }
-
-    if (current === n - 1) count++;
+    treeOdd.insert(A[i], i);
   }
 
-  return count;
+  for (let i = n - 1; i >= 0; i--) {
+    const result = treeEven.findPredecessor(A[i]);
+    if (result !== null) {
+      nextEven[i] = result.index;
+    }
+    treeEven.insert(A[i], i);
+  }
+
+  const canReachOdd = Array(n).fill(false);
+  const canReachEven = Array(n).fill(false);
+
+  canReachOdd[n - 1] = true;
+  canReachEven[n - 1] = true;
+
+  for (let i = n - 2; i >= 0; i--) {
+    if (nextOdd[i] !== null) {
+      canReachOdd[i] = canReachEven[nextOdd[i]];
+    }
+
+    if (nextEven[i] !== null) {
+      canReachEven[i] = canReachOdd[nextEven[i]];
+    }
+  }
+
+  let count = 0;
+  for (let i = 0; i < n - 1; i++) {
+    if (canReachOdd[i]) {
+      count++;
+    }
+  }
+  count++;
+
+  console.log(count);
 }
 
 function main() {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
-  let numberOfStudents, studentArray = [];
+  let numberOfStudents,
+    studentArray = [];
 
-  rl.question('', (n) => {
+  rl.question("", n => {
     numberOfStudents = parseInt(n);
-    rl.question('', (studentStr) => {
-        studentArray = studentStr.split(' ').map(Number);
-        const result = countSubmittedSheets(numberOfStudents, studentArray);
-        console.log(result);
-        rl.close();
-      });
+    rl.question("", studentStr => {
+      studentArray = studentStr.split(" ").map(Number);
+
+      if (numberOfStudents === 1) {
+        console.log(1);
+        return;
+      }
+      something(studentArray, numberOfStudents);
+      rl.close();
+    });
   });
 }
 
